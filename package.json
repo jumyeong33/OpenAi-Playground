@@ -1,0 +1,19 @@
+{
+  "name": "prompt",
+  "version": "1.0.0",
+  "description": "example of using openAI",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "jumyeong",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^8.35.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "openai": "^3.2.1"
+  }
+}
