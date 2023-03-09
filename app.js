@@ -26,16 +26,97 @@ async function generateResponse(prompt) {
   })
   return response.data.choices[0].text.trim()
 }
-const option = `
-Options :
-a. summary my CV according to Job requirements
-b. reason to hire me and against opinion 
-c. advice to apply this job and preparation
-`
 
-function uploadFile() {
+async function executeOptions(select, jobGenerated, resume) {
+  const options = {
+    'a' : async() => {
+      const promptForA = `
+      Consider the following job requirements, summarize the following candidate
+      ===
+      JOB requirements : 
+      ${jobGenerated}
+      ===
+      CANDIDATE resume : 
+      ${resume}
+      `
+      return await generateResponse(promptForA);
+    },
+    'b' : async() => {
+      const promptForB =`
+      list the top 3 reasons for and against hiring the following candidate for the following job:
+      Candidate : 
+      ${resume}
+      ===
+      Job Requirements : 
+      ${jobGenerated}
+      `
+      return await generateResponse(promptForB);
+    },
+    'c' : async() => {
+      const promptForC =`
+      give some resume advices according to compare candidate resume to job requrirements 
+      ===
+      Candidate : 
+      ${resume}
+      ===
+      Job Requirements : 
+      ${jobGenerated}
+      ===
+      Advice :
+      `
+      return await generateResponse(promptForC);
+    },
+    'd' : async() => {
+      return new Promise((res) => {
+        rl.question('Q: ', async function(msg) {
+          const promptForD =`
+          ${msg}
+          ===
+          Candidate : 
+          ${resume}
+          ===
+          Job Requirements : 
+          ${jobGenerated}
+          ===
+          `
+          const result = await generateResponse(promptForD);
+          res(result)
+        })
+      })
+    }
+  }
+  const selectedOption = options[select];
+  if (!selectedOption) {
+    throw new Error(`Invalid option: ${select}`);
+  }
+  return await selectedOption();
+}
+
+function showOption(job, resume) {
+  const option = `
+  Options :
+  a. summary my CV according to Job requirements
+  b. reason to hire me and against opinion 
+  c. advice to apply this job and preparation
+  d. make question whatever you want based on your cv and job ad
+  `
+  console.log(option)
   return new Promise((res) => {
-    rl.question('Upload File : ', function(path) {
+    rl.question('Select: ', async function(select) {
+      try{
+        const result = await executeOptions(select, job, resume)
+        res(result)
+      } catch (err) {
+        console.log(err)
+      }
+    })
+  })
+}
+
+
+function uploadResume() {
+  return new Promise((res) => {
+    rl.question('Upload Resume : ', function(path) {
       console.log('read cv...');
       try {
         const content = readFile(path)
@@ -43,7 +124,7 @@ function uploadFile() {
       } catch (err) {
         console.log(err)
         console.log('Upload failed.. try again..');
-        uploadFile().then(res);
+        uploadResume().then(res);
       }
     })
   })
@@ -57,13 +138,16 @@ async function prompt() {
   ===
   Summary : 
   `
+  let jobGenerated;
   try{
     console.log('Load.....')
-    const jobGenerated = await generateResponse(jobPromt)
+    jobGenerated = await generateResponse(jobPromt)
   } catch (err) {
     console.log(err)
   }
-  const result = await uploadFile()
+  const resume = await uploadResume()
+  const result = await showOption(jobGenerated, resume)
+  console.log(result)
   
 }
 
