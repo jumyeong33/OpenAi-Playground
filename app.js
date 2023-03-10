@@ -2,14 +2,8 @@
 const basePath = process.cwd();
 const readline = require('readline');
 const fs = require('fs');
-const { errorMsg, sendMsg, system, yellow } = require('./lib/pretty')
-const { Configuration, OpenAIApi } = require("openai");
-require('dotenv').config();
-
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
+const { errorMsg, sendMsg, system, yellow } = require('./lib/pretty');
+const { generateResponse } =require('./lib/openAi')
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -22,8 +16,8 @@ function readFile(path) {
 
 function readFileFromDir() {
   try {
-    const files = fs.readdirSync(`${basePath}/assets`);
-    const path = `${basePath}/assets/${files[0]}`;
+    const files = fs.readdirSync(`${basePath}/assets/job`);
+    const path = `${basePath}/assets/job/${files[0]}`;
     return readFile(path);
   } catch(err) {
     console.log(errorMsg('Please add job description before start..'));
@@ -41,16 +35,6 @@ function makePromptMsg(job, resume) {
   ${resume}`
 }
 
-// one action to get response from openAI
-async function generateResponse(prompt) {
-  const response = await openai.createCompletion({
-    model : "text-davinci-003",
-    prompt :prompt,
-    max_tokens: 2000
-  })
-  return response.data.choices[0].text.trim();
-}
-
 async function executeOptions(select, jobGenerated, resume) {
   const options = {
     'a' : async() => {
@@ -62,7 +46,7 @@ async function executeOptions(select, jobGenerated, resume) {
       return await generateResponse(promptForB);
     },
     'c' : async() => {
-      const promptForC =`give some resume advices according to compare candidate resume to job requrirements`+ + makePromptMsg(jobGenerated, resume)
+      const promptForC =`give some resume advices according to compare candidate resume to job requrirements`+ makePromptMsg(jobGenerated, resume)
       return await generateResponse(promptForC);
     },
     'd' : async() => {
@@ -109,7 +93,6 @@ function showOption(job, resume) {
     })
   })
 }
-
 
 function uploadResume() {
   return new Promise((res) => {
