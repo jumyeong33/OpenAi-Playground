@@ -2,8 +2,12 @@
 const basePath = process.cwd();
 const readline = require('readline');
 const fs = require('fs');
-const { errorMsg, sendMsg, system, yellow } = require('./lib/pretty');
-const { generateResponse } =require('./lib/openAi')
+const { errorMsg, sendMsg, system, yellow } = require('../lib/pretty');
+const { generateResponse } =require('../lib/openAi')
+
+function properPath() {
+  return basePath.replace('src', '');
+}
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -15,9 +19,10 @@ function readFile(path) {
 }
 
 function readFileFromDir() {
+  let properBasePath = properPath();
   try {
-    const files = fs.readdirSync(`${basePath}/assets/job`);
-    const path = `${basePath}/assets/job/${files[0]}`;
+    const files = fs.readdirSync(`${properBasePath}/assets/job`);
+    const path = `${properBasePath}/assets/job/${files[0]}`;
     return readFile(path);
   } catch(err) {
     console.log(errorMsg('Please add job description before start..'));
