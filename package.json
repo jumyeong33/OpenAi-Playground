@@ -2,9 +2,9 @@
   "name": "prompt",
   "version": "1.0.0",
   "description": "example of using openAI",
-  "main": "app.js",
+  "main": "checkResume.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "node checkResume.js",
     "optimal": "node src/optimalCandidate.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
